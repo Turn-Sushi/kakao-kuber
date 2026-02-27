@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mariadb-pod
+  labels:
+    app: mariadb
+spec:
+  containers:
+  - name: mariadb-container
+    image: mariadb:12.1.2
+    ports:
+    - containerPort: 3306
+
+    env:
+    - name: MARIADB_ROOT_PASSWORD
+      valueFrom:
+        configMapKeyRef:
+          name: mariadb-config
+          key: MARIADB_ROOT_PASSWORD
+
+    volumeMounts:
+    - name: mariadb-vol
+      mountPath: /var/lib/mysql
+
+    - name: mariadb-config-volume
+      mountPath: /etc/mysql/conf.d/my.cnf
+      subPath: my.cnf
+
+    - name: mariadb-initdb
+      mountPath: /docker-entrypoint-initdb.d
+
+  volumes:
+    - name: mariadb-vol
+      persistentVolumeClaim:
+        claimName: mariadb-pvc
+
+    - name: mariadb-config-volume
+      configMap:
+        name: mariadb-my-config
+
+    - name: mariadb-initdb
+      configMap:
+        name: mariadb-my-config
+        items:
+          - key: init.sql
+            path: init.sql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mariadb

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: app1-config
+data:
+  APP1_PATH: "/app1"
+  APP2_PATH: "/app2"
+  # 개별 Pod라 동일한 포트 사용 가능
+  APP1_URL: "http://app2-service:8000"
+  APP2_URL: "http://app3-service:8000"

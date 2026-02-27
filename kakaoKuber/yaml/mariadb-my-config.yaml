@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: mariadb-my-config
+
+data:
+  my.cnf: |
+    [client]
+    default-character-set = utf8mb4
+
+    [mysql]
+    default-character-set = utf8mb4
+
+    [mysqld]
+    character-set-client-handshake = FALSE
+    character-set-server           = utf8mb4
+    collation-server               = utf8mb4_unicode_ci
+    autocommit                     = 0
+    #sql_mode                      = ORACLE
+    max_allowed_packet             = 1024M
+
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS mini;
+    USE mini;
+
+    CREATE TABLE mini.`user_pr`(
+      `pro_no`	INT(11)			NOT NULL	COMMENT '프로파일 번호'				AUTO_INCREMENT,
+      `user_no`	INT(11)			NOT NULL	COMMENT '회원 번호',
+      `origin`	VARCHAR(100)	NOT NULL	COMMENT '저장 전 원본 파일이름',
+      `ext`		VARCHAR(3)		NOT NULL	COMMENT '확장명ex).png, jpg, jpeg, bmp', 
+      `fileName`	VARCHAR(100)	NOT NULL	COMMENT 'DB 저장시 변경된 이름',
+      `cntType`	VARCHAR(20)		NOT NULL	COMMENT '파일 형식 ex) 이미지파일, 영상파일, exe파일등',
+      `regDate`	DATETIME		NOT NULL	COMMENT '프로필 등록일자'				DEFAULT current_timestamp(),
+      `modDate`	DATETIME		NOT NULL	COMMENT '프로필 수정일자'				DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+      PRIMARY KEY (`pro_no`) USING BTREE
+    )
+    COMMENT='프로필 파일'
+    COLLATE='utf8mb4_unicode_ci'
+    ENGINE=InnoDB;
+
+    CREATE TABLE `mini`.`user`(
+      `user_no`	INT(11)			NOT NULL	COMMENT '회원 번호'					AUTO_INCREMENT,
+      `pro_no`	INT(11)			NULL		COMMENT '프로필 번호',
+      `name`		VARCHAR(30)		NOT NULL	COMMENT '이름',
+      `email`		VARCHAR(150)	NOT NULL	COMMENT '이메일',
+      `gender`	BOOLEAN			NULL		COMMENT '성별(0:여자, 1:남자)',
+      `delYn`		TINYINT(1)		NOT NULL	COMMENT '탈퇴여부(0:회원, 1: 탈퇴)'		DEFAULT FALSE,
+      `adminYn`	TINYINT(1)		NOT NULL	COMMENT '관리자여부(0:회원, 1: 관리자)'	DEFAULT FALSE,
+      `regDate`	DATETIME		NOT NULL	COMMENT '회원 등록일자'					DEFAULT current_timestamp(),
+      `modDate`	DATETIME		NOT NULL	COMMENT '회원정보수정일자'				DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+      PRIMARY KEY (`user_no`) USING BTREE,
+      INDEX `fk_user_userPr` (`pro_no`) USING BTREE,
+      CONSTRAINT `fk_userPr_user`	FOREIGN KEY (`pro_no`) REFERENCES `user_pr`(`pro_no`) ON UPDATE NO ACTION ON DELETE NO ACTION
+    )
+    COMMENT='사용자'
+    COLLATE='utf8mb4_unicode_ci'
+    ENGINE=InnoDB;
+
+    COMMIT;

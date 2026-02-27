@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: mariadb-config
+data:
+  MARIADB_HOST: "localhost"
+  MARIADB_PORT: "3306"
+  MARIADB_ROOT_PASSWORD: "1234"
+  MARIADB_DATABASE: "mini"
+  TZ: "Asia/Seoul"
+  LC_ALL: "en_US.UTF-8"
